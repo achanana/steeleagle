@@ -21,6 +21,7 @@ import olympe.enums.move as move_mode
 import olympe.enums.gimbal as gimbal_mode
 import math
 from timer import Timer
+import logging
 
 logger = logging.getLogger()
 
