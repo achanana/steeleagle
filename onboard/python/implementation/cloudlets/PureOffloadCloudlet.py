@@ -11,6 +11,7 @@ import logging
 import asyncio
 from syncer import sync
 import cv2
+from timer import Timer
 
 from cnc_protocol import cnc_pb2
 from gabriel_protocol import gabriel_pb2
@@ -75,8 +76,10 @@ class PureOffloadCloudlet(CloudletItf.CloudletItf):
             input_frame = gabriel_pb2.InputFrame()
             if not self.stop:
                 try:
-                    f = sync(self.drone.getVideoFrame())
-                    _, frame = cv2.imencode('.jpg', f)
+                    with Timer(logger, name="Getting video frame from drone"):
+                        f = sync(self.drone.getVideoFrame())
+                    with Timer(logger, name="Converting bytes to jpg")
+                        _, frame = cv2.imencode('.jpg', f)
                     input_frame.payload_type = gabriel_pb2.PayloadType.IMAGE
                     input_frame.payloads.append(frame.tobytes())
 
@@ -92,11 +95,11 @@ class PureOffloadCloudlet(CloudletItf.CloudletItf):
                 input_frame.payloads.append("Streaming not started, no frame to show.")
 
             return input_frame
-                    
+
         return ProducerWrapper(producer=producer, source_name=self.source)
 
     def getResults(self, engine_key):
-        try:    
+        try:
             return self.engine_results.pop(engine_key)
         except:
             return None

@@ -20,10 +20,15 @@ from olympe.messages.common.CalibrationState import MagnetoCalibrationRequiredSt
 import olympe.enums.move as move_mode
 import olympe.enums.gimbal as gimbal_mode
 import math
+from timer import Timer
 
+logger = logging.getLogger()
+
+def timeit(func):
+    k
 
 class ParrotAnafiDrone(DroneItf.DroneItf):
-    
+
     def __init__(self, **kwargs):
         if 'sim' in kwargs:
             self.ip = '10.202.0.1'
@@ -105,7 +110,7 @@ class ParrotAnafiDrone(DroneItf.DroneItf):
 
     async def moveBy(self, x, y, z, t):
         self.drone(
-            moveBy(x, y, z, t) 
+            moveBy(x, y, z, t)
         )
         await self.hovering()
 
@@ -170,10 +175,10 @@ class ParrotAnafiDrone(DroneItf.DroneItf):
         return self.drone.get_state(BatteryStateChanged)["percent"]
 
     async def getMagnetometerReading(self):
-        return self.drone.get_state(MagnetoCalibrationRequiredState)["required"] 
-    
+        return self.drone.get_state(MagnetoCalibrationRequiredState)["required"]
+
     async def getSatellites(self):
-        return self.drone.get_state(NumberOfSatelliteChanged)["numberOfSatellite"] 
+        return self.drone.get_state(NumberOfSatelliteChanged)["numberOfSatellite"]
 
     async def kill(self):
         self.active = False
@@ -187,7 +192,7 @@ class StreamingThread(threading.Thread):
 
     def __init__(self, drone, ip):
         threading.Thread.__init__(self)
-        self.currentFrame = None 
+        self.currentFrame = None
         self.drone = drone
         os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "rtsp_transport;udp"
         self.cap = cv2.VideoCapture(f"rtsp://{ip}/live", cv2.CAP_FFMPEG)
@@ -196,17 +201,19 @@ class StreamingThread(threading.Thread):
     def run(self):
         try:
             while(self.isRunning):
-                ret, self.currentFrame = self.cap.read()
+                with Timer(logger, "Reading current frame from "):
+                    ret, self.currentFrame = self.cap.read()
         except Exception as e:
             print(e)
 
     def grabFrame(self):
         try:
-            frame = self.currentFrame.copy()
+            with Timer(logger, "Copying current frame"):
+                frame = self.currentFrame.copy()
             return frame
         except Exception as e:
             # Send a blank frame
-            return np.zeros((720, 1280, 3), np.uint8) 
+            return np.zeros((720, 1280, 3), np.uint8)
 
     def stop(self):
         self.isRunning = False

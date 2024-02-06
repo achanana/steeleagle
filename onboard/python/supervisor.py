@@ -210,7 +210,7 @@ class Supervisor:
             input_frame = gabriel_pb2.InputFrame()
             input_frame.payload_type = gabriel_pb2.PayloadType.TEXT
             input_frame.payloads.append('heartbeart'.encode('utf8'))
-    
+
             extras = cnc_pb2.Extras()
             extras.drone_id = sync(self.drone.getName())
             extras.location.latitude = sync(self.drone.getLat())
@@ -233,7 +233,7 @@ class Supervisor:
             logger.debug('Producing Gabriel frame!')
             input_frame.extras.Pack(extras)
             return input_frame
-    
+
         return ProducerWrapper(producer=producer, source_name=self.source)
 
 
