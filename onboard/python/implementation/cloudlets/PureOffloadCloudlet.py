@@ -78,7 +78,7 @@ class PureOffloadCloudlet(CloudletItf.CloudletItf):
                 try:
                     with Timer(logger, name="Getting video frame from drone"):
                         f = sync(self.drone.getVideoFrame())
-                    with Timer(logger, name="Converting bytes to jpg")
+                    with Timer(logger, name="Converting bytes to jpg"):
                         _, frame = cv2.imencode('.jpg', f)
                     input_frame.payload_type = gabriel_pb2.PayloadType.IMAGE
                     input_frame.payloads.append(frame.tobytes())
