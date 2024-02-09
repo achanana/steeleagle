@@ -11,7 +11,9 @@ class Timer:
     logger: logging.Logger
     name: Optional[str] = None
     text: str = "{} took {:0.4f} seconds"
+    max_frequency: Optional[int] = None
     _start_time: Optional[float] = field(default=None, init=False, repr=False)
+    _last_log_time: Optional[int] = None
 
     def __enter__(self):
         self.start()
@@ -37,6 +39,11 @@ class Timer:
         self._start_time = None
 
         # Report elapsed time
-        self.logger.info(self.text.format(self.name, elapsed_time))
+        if self.max_frequency:
+            now = time.time()
+            if self._last_log_time and now - self._last_log_time < self.max_frequency:
+                return
+            else:
+                self._last_log_time = now
 
-        return elapsed_time
+        self.logger.info(self.text.format(self.name, elapsed_time))

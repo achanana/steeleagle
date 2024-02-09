@@ -22,8 +22,14 @@ import olympe.enums.gimbal as gimbal_mode
 import math
 from timer import Timer
 import logging
+import time
 
 logger = logging.getLogger()
+max_frequency=1
+read_frame_timer = \
+    Timer(logger, "Reading current frame from drone", max_frequency=max_frequency)
+copy_frame_timer = \
+    Timer(logger, "Copying current frame", max_frequency=max_frequency)
 
 def timeit(func):
     k
@@ -202,14 +208,14 @@ class StreamingThread(threading.Thread):
     def run(self):
         try:
             while(self.isRunning):
-                with Timer(logger, "Reading current frame from "):
+                with read_frame_timer:
                     ret, self.currentFrame = self.cap.read()
         except Exception as e:
             print(e)
 
     def grabFrame(self):
         try:
-            with Timer(logger, "Copying current frame"):
+            with copy_frame_timer:
                 frame = self.currentFrame.copy()
             return frame
         except Exception as e:
