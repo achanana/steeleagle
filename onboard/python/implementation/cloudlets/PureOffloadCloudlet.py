@@ -25,6 +25,8 @@ video_frame_timer = \
     Timer(logger, name="Getting video frame from drone", max_frequency=max_frequency)
 jpg_conversion_timer = \
     Timer(logger, name="Converting bytes to jpg", max_frequency=max_frequency)
+bytes_conversion_timer = \
+    Timer(logger, name="Converting np jpeg to bytes", max_frequency=max_frequency)
 
 class PureOffloadCloudlet(CloudletItf.CloudletItf):
 
@@ -87,7 +89,8 @@ class PureOffloadCloudlet(CloudletItf.CloudletItf):
                     with jpg_conversion_timer:
                         _, frame = cv2.imencode('.jpg', f)
                     input_frame.payload_type = gabriel_pb2.PayloadType.IMAGE
-                    input_frame.payloads.append(frame.tobytes())
+                    with bytes_conversion_timer:
+                        input_frame.payloads.append(frame.tobytes())
 
                     extras = self.produce_extras()
                     if extras is not None:
